@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{minitest-display}
-  s.version = ""
+  s.version = "0.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "lib/minitest/display.rb",
+    "minitest-display.gemspec",
     "test/helper.rb",
     "test/test_minitest-display.rb"
   ]
