@@ -20,7 +20,7 @@ end
 
 module MiniTest
   module Display
-
+    VERSION = '0.0.1'
     class << self
       def options
         @options ||= {
@@ -74,7 +74,7 @@ class MiniTest::Unit
   def _run_suite(suite, type)
     printable_suite = suite.superclass == MiniTest::Unit::TestCase && suite != MiniTest::Spec
     if display.options[:suite_names] && printable_suite
-      print display.color("#{suite}#{display.options[:suite_divider]}", :suite)
+      print display.color("\n#{suite}#{display.options[:suite_divider]}", :suite)
     end
 
     filter = options[:filter] || '/./'

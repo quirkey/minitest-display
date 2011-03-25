@@ -51,9 +51,21 @@ class TestMinitestDisplay < MiniTest::Unit::TestCase
           assert_equal 'test', 'test'
         end
       end
+
+      class AnotherBasicTest < MiniTest::Unit::TestCase
+
+        def test_truth
+          assert false
+        end
+
+        def test_equality
+          assert_equal 'test', 'test'
+        end
+      end
     TESTCASE
 
-    assert_output(/BasicTest/)
+    assert_output(/^BasicTest \/\//)
+    assert_output(/AnotherBasicTest \/\//)
     assert_output(/F/)
     assert_output(/\./)
   end
