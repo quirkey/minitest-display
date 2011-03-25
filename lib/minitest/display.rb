@@ -1,23 +1,53 @@
+require 'benchmark'
+
 module MiniTest
   module Display
-    ANSI_COLOR_CODES = {
-      clear: "\e[0m",
-      red: "\e[31m",
-      green:"\e[32m",
-      yellow: "\e[33m"
-    }
 
-    def self.options
-      @options || {
-        suite_names: true,
-        suite_divider: " // ",
-        color: true
-      }
+    class << self
+      def options
+        @options || {
+          suite_names: true,
+          suite_divider: " // ",
+          color: true,
+          print: {
+            success: '.',
+            failure: 'F',
+            error: 'E'
+          },
+          colors: {
+            clear: "\e[0m",
+            red: "\e[31m",
+            green:"\e[32m",
+            yellow: "\e[33m",
+
+            suite: :clear,
+            success: :green,
+            failure: :red,
+            error: :red
+          }
+        }
+      end
+
+      def options=(new_options)
+        self.options.update(new_options)
+      end
+
+      def color(string, color)
+        return string unless options[:color]
+        tint(color) + string + tint(:clear)
+      end
+
+      def tint(color)
+        if color.is_a?(Symbol)
+          if c = options[:colors][color]
+            tint(c)
+          end
+        else
+          color
+        end
+      end
     end
 
-    def self.options=(new_options)
-      self.options.update(new_options)
-    end
   end
 end
 
@@ -25,7 +55,9 @@ class MiniTest::Unit
   # Monkey Patchin!
   def _run_suite(suite, type)
     printable_suite = suite.superclass == MiniTest::Unit::TestCase && suite != MiniTest::Spec
-    print "#{suite}#{display.options[:suite_divider]}" if display.options[:suite_names] && printable_suite
+    if display.options[:suite_names] && printable_suite
+      print display.color("#{suite}#{display.options[:suite_divider]}", :suite)
+    end
 
     filter = options[:filter] || '/./'
     filter = Regexp.new $1 if filter =~ /\/(.*)\//
@@ -36,12 +68,22 @@ class MiniTest::Unit
 
       print "#{suite}##{method} = " if @verbose
 
-      @start_time = Time.now
-      result = inst.run self
-      time = Time.now - @start_time
+      result = nil
+      time = Benchmark.realtime {
+        result = inst.run self
+      }
 
       print "%.2f s = " % time if @verbose
-      print result
+      print case result
+      when "."
+        display.color(display.options[:print][:success], :success)
+      when "F"
+        display.color(display.options[:print][:failure], :failure)
+      when "E"
+        display.color(display.options[:print][:error], :error)
+      else
+        result
+      end
       puts if @verbose
 
       inst._assertions
