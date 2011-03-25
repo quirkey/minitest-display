@@ -17,17 +17,20 @@ class MiniTest::Unit::TestCase
   attr_reader :suite_output
 
   def capture_test_output(testcase_str)
-    lib_dir = File.expand_path(File.dirname(__FILE__) + '/../lib/')
+    base_dir = File.expand_path(File.dirname(__FILE__))
+    lib_dir =  File.expand_path(File.join(base_dir, '..', 'lib'))
+    tmpdir = File.join(base_dir, "tmp")
+    FileUtils.mkdir_p(tmpdir)
+    tmpfilename = "#{tmpdir}/test_suite.rb"
     header = %{
       require 'minitest/autorun'
       require '#{lib_dir}/minitest/display'
     }
 
     testcase_str = header + "\n" + testcase_str
-    testcase_str = testcase_str.split("\n").map { |l| l.strip }
-    testcase_str = testcase_str.reject { |l| l.empty? }.join(';')
-
-    cmd = %[`which ruby` -e "#{testcase_str}" 2>&1]
+    File.unlink(tmpfilename) if File.readable?(tmpfilename)
+    File.open(tmpfilename, 'w') {|f| f << testcase_str }
+    cmd = %[`which ruby` #{tmpfilename} 2>&1]
 
     @suite_output = %x[#{cmd}]
     if $print_runs
