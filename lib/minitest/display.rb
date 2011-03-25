@@ -64,6 +64,21 @@ module MiniTest
           color
         end
       end
+
+      DONT_PRINT_CLASSES = %w{
+              ActionController::IntegrationTest
+              ActionController::TestCase
+              ActionMailer::TestCase
+              ActionView::TestCase
+              ActiveRecord::TestCase
+              ActiveSupport::TestCase
+              Test::Unit::TestCase
+              MiniTest::Unit::TestCase
+              MiniTest::Spec}
+
+      def printable_suite?(suite)
+        !DONT_PRINT_CLASSES.include?(suite.to_s)
+      end
     end
 
   end
@@ -72,8 +87,7 @@ end
 class MiniTest::Unit
   # Monkey Patchin!
   def _run_suite(suite, type)
-    printable_suite = suite.superclass == MiniTest::Unit::TestCase && suite != MiniTest::Spec
-    if display.options[:suite_names] && printable_suite
+    if display.options[:suite_names] && display.printable_suite?(suite)
       print display.color("\n#{suite}#{display.options[:suite_divider]}", :suite)
     end
 
