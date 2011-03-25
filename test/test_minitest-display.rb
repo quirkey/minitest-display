@@ -64,8 +64,8 @@ class TestMinitestDisplay < MiniTest::Unit::TestCase
       end
     TESTCASE
 
-    assert_output(/^BasicTest \/\//)
-    assert_output(/AnotherBasicTest \/\//)
+    assert_output(/^BasicTest |/)
+    assert_output(/AnotherBasicTest |/)
     assert_output(/F/)
     assert_output(/\./)
   end
@@ -73,6 +73,7 @@ class TestMinitestDisplay < MiniTest::Unit::TestCase
   def test_runs_basic_test_suite_with_different_printing
     capture_test_output <<-TESTCASE
       MiniTest::Display.options = {
+        suite_divider: ' // ',
         print: {
           success: 'PASS'
         }

@@ -25,7 +25,7 @@ module MiniTest
       def options
         @options ||= {
           suite_names: true,
-          suite_divider: " // ",
+          suite_divider: " | ",
           color: true,
           print: {
             success: '.',
