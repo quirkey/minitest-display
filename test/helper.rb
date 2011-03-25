@@ -7,12 +7,53 @@ rescue Bundler::BundlerError => e
   $stderr.puts "Run `bundle install` to install missing gems"
   exit e.status_code
 end
-require 'test/unit'
-require 'shoulda'
-
+require 'minitest/autorun'
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
-require 'minitest-display'
+require 'minitest/display'
+$print_runs = ENV['DEBUG']
 
-class Test::Unit::TestCase
+class MiniTest::Unit::TestCase
+  attr_reader :suite_output
+
+  def capture_test_output(testcase_str)
+    lib_dir = File.expand_path(File.dirname(__FILE__) + '/../lib/')
+    header = %{
+      require 'minitest/autorun'
+      require '#{lib_dir}/minitest/display'
+    }
+
+    testcase_str = header + "\n" + testcase_str
+    testcase_str = testcase_str.split("\n").map { |l| l.strip }
+    testcase_str = testcase_str.reject { |l| l.empty? }.join(';')
+
+    cmd = %[`which ruby` -e "#{testcase_str}" 2>&1]
+
+    @suite_output = %x[#{cmd}]
+    if $print_runs
+      puts "-------"
+      puts @suite_output
+      puts "-------"
+    end
+  end
+
+  def assert_output(duck)
+    if duck.is_a? Regexp
+      assert_match duck, strip_color(suite_output)
+    else
+      assert strip_color(suite_output).include?(duck.to_s)
+    end
+  end
+
+  def assert_no_output(duck)
+    if duck.is_a? Regexp
+      assert_no_match duck, strip_color(suite_output)
+    else
+      assert ! strip_color(suite_output).include?(duck.to_s)
+    end
+  end
+
+  def strip_color(string)
+    string.gsub(/\e\[(?:[34][0-7]|[0-9])?m/, '') # thanks again term/ansicolor
+  end
 end
