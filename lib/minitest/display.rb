@@ -27,6 +27,7 @@ module MiniTest
           suite_names: true,
           suite_divider: " | ",
           color: true,
+          wrap_at: 80,
           print: {
             success: '.',
             failure: 'F',
@@ -87,12 +88,17 @@ end
 class MiniTest::Unit
   # Monkey Patchin!
   def _run_suite(suite, type)
+    suite_header = ""
     if display.options[:suite_names] && display.printable_suite?(suite)
-      print display.color("\n#{suite}#{display.options[:suite_divider]}", :suite)
+      suite_header = suite.to_s
+      print display.color("\n#{suite_header}#{display.options[:suite_divider]}", :suite)
     end
 
     filter = options[:filter] || '/./'
     filter = Regexp.new $1 if filter =~ /\/(.*)\//
+
+    wrap_at = display.options[:wrap_at] - suite_header.length
+    wrap_count = wrap_at
 
     assertions = suite.send("#{type}_methods").grep(filter).map { |method|
       inst = suite.new method
@@ -117,6 +123,12 @@ class MiniTest::Unit
         result
       end
       puts if @verbose
+
+      wrap_count -= 1
+      if wrap_count == 0
+        print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
+        wrap_count = wrap_at
+      end
 
       inst._assertions
     }
