@@ -1,11 +1,29 @@
 require 'benchmark'
 
+class Hash
+  unless method_defined?(:deep_merge!)
+
+    def deep_merge!(other_hash)
+      other_hash.each_pair do |k,v|
+        tv = self[k]
+        self[k] = tv.is_a?(Hash) && v.is_a?(Hash) ? tv.deep_merge(v) : v
+      end
+      self
+    end
+
+    def deep_merge(other_hash)
+      dup.deep_merge!(other_hash)
+    end
+
+  end
+end
+
 module MiniTest
   module Display
 
     class << self
       def options
-        @options || {
+        @options ||= {
           suite_names: true,
           suite_divider: " // ",
           color: true,
@@ -29,7 +47,7 @@ module MiniTest
       end
 
       def options=(new_options)
-        self.options.update(new_options)
+        self.options.deep_merge!(new_options)
       end
 
       def color(string, color)

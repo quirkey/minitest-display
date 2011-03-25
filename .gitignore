@@ -40,5 +40,5 @@ pkg
 #
 # For vim:
 #*.swp
-
+tmp
 test/tmp

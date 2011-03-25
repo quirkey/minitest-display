@@ -19,9 +19,9 @@ class MiniTest::Unit::TestCase
   def capture_test_output(testcase_str)
     base_dir = File.expand_path(File.dirname(__FILE__))
     lib_dir =  File.expand_path(File.join(base_dir, '..', 'lib'))
-    tmpdir = File.join(base_dir, "tmp")
+    tmpdir = File.join(base_dir, '..', "tmp")
     FileUtils.mkdir_p(tmpdir)
-    tmpfilename = "#{tmpdir}/test_suite.rb"
+    tmpfilename = "#{tmpdir}/fake_test_suite.rb"
     header = %{
       require 'minitest/autorun'
       require '#{lib_dir}/minitest/display'
