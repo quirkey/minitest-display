@@ -85,6 +85,43 @@ end
 
 class MiniTest::Unit
   # Monkey Patchin!
+  def _run_anything(type)
+    suites = TestCase.send "#{type}_suites"
+    return if suites.empty?
+
+    start = Time.now
+
+    puts
+    puts "# Running #{type}s:"
+    puts
+
+    @test_count, @assertion_count = 0, 0
+    sync = output.respond_to? :"sync=" # stupid emacs
+    old_sync, output.sync = output.sync, true if sync
+
+    results = _run_suites suites, type
+
+    @test_count      = results.inject(0) { |sum, (tc, _)| sum + tc }
+    @assertion_count = results.inject(0) { |sum, (_, ac)| sum + ac }
+
+    output.sync = old_sync if sync
+
+    t = Time.now - start
+
+    puts
+    puts
+    puts "Finished #{type}s in %.6fs, %.4f tests/s, %.4f assertions/s." %
+      [t, test_count / t, assertion_count / t]
+
+    report.each_with_index do |msg, i|
+      puts "\n%3d) %s" % [i + 1, msg]
+    end
+
+    puts
+
+    status
+  end
+
   def _run_suite(suite, type)
     suite_header = ""
     if display.options[:suite_names] && display.printable_suite?(suite)
@@ -131,6 +168,12 @@ class MiniTest::Unit
     }
 
     return assertions.size, assertions.inject(0) { |sum, n| sum + n }
+  end
+
+  def status(io = self.output)
+    format = "%d tests, %d assertions, %d failures, %d errors, %d skips"
+    final_status = failures + errors > 0 ? :failure : :success
+    io.puts display.color(format % [test_count, assertion_count, failures, errors, skips], final_status)
   end
 
   private
