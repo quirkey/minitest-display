@@ -33,10 +33,35 @@ module MiniTest
             error: 'E'
           },
           colors: {
-            clear: "\e[0m",
-            red: "\e[31m",
-            green:"\e[32m",
-            yellow: "\e[33m",
+            clear: 0,
+            bold: 1,
+            italics: 3,
+            underline: 4,
+            inverse: 9,
+            strikethrough: 22,
+            bold_off: 23,
+            italics_off: 24,
+            underline_off: 27,
+            inverse_off: 29,
+            strikethrough_off: 30,
+            black: 30,
+            red: 31,
+            green: 32,
+            yellow: 33,
+            blue: 34,
+            magenta: 35,
+            cyan: 36,
+            white: 37,
+            default: 39,
+            bg_black: 40,
+            bg_red: 41,
+            bg_green: 42,
+            bg_yellow: 43,
+            bg_blue: 44,
+            bg_magenta: 45,
+            bg_cyan: 46,
+            bg_white: 47,
+            bg_default: 49,
 
             suite: :clear,
             success: :green,
@@ -56,12 +81,15 @@ module MiniTest
       end
 
       def tint(color)
-        if color.is_a?(Symbol)
+        case color
+        when Array
+          color.collect {|c| tint(c) }.join('')
+        when Symbol
           if c = options[:colors][color]
             tint(c)
           end
         else
-          color
+          "\e[#{color}m"
         end
       end
 
@@ -174,7 +202,7 @@ class MiniTest::Unit
   def status(io = self.output)
     format = "%d tests, %d assertions, %d failures, %d errors, %d skips"
     final_status = failures + errors > 0 ? :failure : :success
-    io.puts display.color(format % [test_count, assertion_count, failures, errors, skips], final_status)
+    io.puts display.color(format % [test_count, assertion_count, failures, errors, skips], [:bold, final_status])
   end
 
   private
