@@ -1,0 +1,7 @@
+- Configurable error puking
+- YAML based configuration
+- Per-User YAML configuration
+- Easy reset to default settings
+- Docs!
+- Slowest test collection/output
+- Dump output as JSON

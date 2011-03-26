@@ -19,6 +19,7 @@ end
 module MiniTest
   module Display
     VERSION = '0.0.1'
+
     class << self
       def options
         @options ||= {
