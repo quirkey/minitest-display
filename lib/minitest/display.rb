@@ -1,5 +1,3 @@
-require 'benchmark'
-
 class Hash
   unless method_defined?(:deep_merge!)
 
@@ -52,7 +50,7 @@ module MiniTest
       end
 
       def color(string, color)
-        return string unless options[:color]
+        return string unless STDOUT.tty? && options[:color]
         tint(color) + string + tint(:clear)
       end
 
@@ -106,10 +104,9 @@ class MiniTest::Unit
 
       print "#{suite}##{method} = " if @verbose
 
-      result = nil
-      time = Benchmark.realtime {
-        result = inst.run self
-      }
+      @start_time = Time.now
+      result = inst.run self
+      time = Time.now - @start_time
 
       print "%.2f s = " % time if @verbose
       print case result
