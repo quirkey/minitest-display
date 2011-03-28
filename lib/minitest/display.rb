@@ -66,7 +66,7 @@ module MiniTest
             suite: :clear,
             success: :green,
             failure: :red,
-            error: :red
+            error: :yellow
           }
         }
       end
