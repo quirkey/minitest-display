@@ -30,7 +30,7 @@ In your test suite/test_helper, require and configure mini test/display:
         color: true,
         print: {
           success: "OK\n",
-          failure: "EPIC FAIL\n"
+          failure: "EPIC FAIL\n",
           error: "ERRRRRRR\n"
         }
       }
