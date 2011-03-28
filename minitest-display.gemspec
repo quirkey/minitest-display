@@ -5,16 +5,17 @@
 
 Gem::Specification.new do |s|
   s.name = %q{minitest-display}
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
-  s.date = %q{2011-03-25}
+  s.date = %q{2011-03-27}
   s.description = %q{Patches MiniTest to allow for an easily configurable output. For Ruby 1.9 :Datches MiniTest to allow for an easily configurable output. For Ruby 1.9 :D. Inspired by leftright, redgreen and other test output gems, with an emphasis on configuration and style}
   s.email = %q{aaron@quirkey.com}
   s.extra_rdoc_files = [
     "LICENSE.txt",
-    "README.rdoc"
+    "README.rdoc",
+    "TODO"
   ]
   s.files = [
     ".document",
@@ -23,6 +24,7 @@ Gem::Specification.new do |s|
     "LICENSE.txt",
     "README.rdoc",
     "Rakefile",
+    "TODO",
     "lib/minitest/display.rb",
     "minitest-display.gemspec",
     "test/helper.rb",
