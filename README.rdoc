@@ -1,6 +1,6 @@
 = minitest-display
 
-MiniTest::Display is a module that monkey patches a lot of the MiniTest::Unit interals to allow for configurable display options.
+MiniTest::Display is a module that monkey patches a lot of the MiniTest::Unit internals to allow for configurable display options.
 You want color?! You want Suite name printouts?!?! You want fried eggs?! Too bad.
 
 I was messing with leftright (https://github.com/jordi/leftright - which is awesome btw) and trying to get it to work well with 1.9 but its all tied up in Test::Unit.
