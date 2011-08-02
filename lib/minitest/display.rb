@@ -204,7 +204,7 @@ class MiniTest::Unit
 
     total_time = Time.now - full_start_time
 
-    if display.options[:suite_time]
+    if assertions.length > 0 && display.options[:suite_time]
       print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
       print "%.2f s" % total_time
       puts
