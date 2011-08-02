@@ -25,6 +25,7 @@ module MiniTest
         @options ||= {
           suite_names: true,
           suite_divider: " | ",
+          suite_time: true,
           color: true,
           wrap_at: 80,
           print: {
@@ -164,6 +165,8 @@ class MiniTest::Unit
     wrap_at = display.options[:wrap_at] - suite_header.length
     wrap_count = wrap_at
 
+    full_start_time = Time.now
+
     assertions = suite.send("#{type}_methods").grep(filter).map { |method|
       inst = suite.new method
       inst._assertions = 0
@@ -196,6 +199,13 @@ class MiniTest::Unit
       inst._assertions
     }
 
+    total_time = Time.now - full_start_time
+
+    if display.options[:suite_time]
+      print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
+      print "%.2f s" % total_time
+      puts
+    end
     return assertions.size, assertions.inject(0) { |sum, n| sum + n }
   end
 
