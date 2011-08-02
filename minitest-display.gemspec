@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
-  s.date = %q{2011-08-01}
+  s.date = %q{2011-08-02}
   s.description = %q{Patches MiniTest to allow for an easily configurable output. For Ruby 1.9 :Datches MiniTest to allow for an easily configurable output. For Ruby 1.9 :D. Inspired by leftright, redgreen and other test output gems, with an emphasis on configuration and style}
   s.email = %q{aaron@quirkey.com}
   s.extra_rdoc_files = [
