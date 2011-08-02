@@ -166,7 +166,7 @@ class MiniTest::Unit
     wrap_count = wrap_at
 
     full_start_time = Time.now
-
+    @test_times ||= []
     assertions = suite.send("#{type}_methods").grep(filter).map { |method|
       inst = suite.new method
       inst._assertions = 0
@@ -176,6 +176,8 @@ class MiniTest::Unit
       @start_time = Time.now
       result = inst.run self
       time = Time.now - @start_time
+
+      @test_times << ["#{suite}##{method}", time]
 
       print "%.2f s = " % time if @verbose
       print case result
