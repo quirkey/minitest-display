@@ -28,6 +28,7 @@ module MiniTest
           suite_time: true,
           color: true,
           wrap_at: 80,
+          output_slow: 5,
           print: {
             success: '.',
             failure: 'F',
@@ -215,6 +216,14 @@ class MiniTest::Unit
     format = "%d tests, %d assertions, %d failures, %d errors, %d skips"
     final_status = failures + errors > 0 ? :failure : :success
     io.puts display.color(format % [test_count, assertion_count, failures, errors, skips], [:bold, final_status])
+
+    if display.options[:output_slow]
+      @test_times.sort! {|a, b| b[1] <=> a[1] }
+      puts "Slowest tests:"
+      @test_times[0..display.options[:output_slow].to_i].each do |test_name, time|
+        puts "%.2f s\t#{test_name}" % time
+      end
+    end
   end
 
   private
