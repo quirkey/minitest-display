@@ -4,14 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{minitest-display}
-  s.version = "0.0.3"
+  s.name = "minitest-display"
+  s.version = "0.0.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
-  s.date = %q{2011-08-02}
-  s.description = %q{Patches MiniTest to allow for an easily configurable output. For Ruby 1.9 :Datches MiniTest to allow for an easily configurable output. For Ruby 1.9 :D. Inspired by leftright, redgreen and other test output gems, with an emphasis on configuration and style}
-  s.email = %q{aaron@quirkey.com}
+  s.date = "2011-12-26"
+  s.description = "Patches MiniTest to allow for an easily configurable output. For Ruby 1.9 :Datches MiniTest to allow for an easily configurable output. For Ruby 1.9 :D. Inspired by leftright, redgreen and other test output gems, with an emphasis on configuration and style"
+  s.email = "aaron@quirkey.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
     "README.md",
@@ -30,11 +30,11 @@ Gem::Specification.new do |s|
     "test/helper.rb",
     "test/test_minitest-display.rb"
   ]
-  s.homepage = %q{http://github.com/quirkey/minitest-display}
+  s.homepage = "http://github.com/quirkey/minitest-display"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.6.2}
-  s.summary = %q{Patches MiniTest to allow for an easily configurable output. For Ruby 1.9 :D}
+  s.rubygems_version = "1.8.10"
+  s.summary = "Patches MiniTest to allow for an easily configurable output. For Ruby 1.9 :D"
   s.test_files = [
     "test/helper.rb",
     "test/test_minitest-display.rb"
