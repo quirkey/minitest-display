@@ -18,7 +18,7 @@ end
 
 module MiniTest
   module Display
-    VERSION = '0.0.3'
+    VERSION = '0.0.4'
 
     class << self
       def options
@@ -96,6 +96,7 @@ module MiniTest
       end
 
       DONT_PRINT_CLASSES = %w{
+              ActionDispatch::IntegrationTest
               ActionController::IntegrationTest
               ActionController::TestCase
               ActionMailer::TestCase
@@ -207,7 +208,6 @@ class MiniTest::Unit
     if assertions.length > 0 && display.options[:suite_time]
       print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
       print "%.2f s" % total_time
-      puts
     end
     return assertions.size, assertions.inject(0) { |sum, n| sum + n }
   end
