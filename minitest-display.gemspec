@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "minitest-display"
-  s.version = "0.0.4"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
-  s.date = "2011-12-26"
+  s.date = "2012-01-23"
   s.description = "Patches MiniTest to allow for an easily configurable output. For Ruby 1.9 :Datches MiniTest to allow for an easily configurable output. For Ruby 1.9 :D. Inspired by leftright, redgreen and other test output gems, with an emphasis on configuration and style"
   s.email = "aaron@quirkey.com"
   s.extra_rdoc_files = [
