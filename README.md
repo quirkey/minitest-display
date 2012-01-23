@@ -12,7 +12,7 @@ Needless to say, it's a work in progress.
 
 ## Requirements
 
-Requires Ruby 1.9 and the gem version of minitest >= 2.0.2
+Requires Ruby 1.8.7 or 1.9 and the gem version of minitest >= 2.0.2
 
 ## Usage
 

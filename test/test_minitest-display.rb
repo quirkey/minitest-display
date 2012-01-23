@@ -73,9 +73,9 @@ class TestMinitestDisplay < MiniTest::Unit::TestCase
   def test_runs_basic_test_suite_with_different_printing
     capture_test_output <<-TESTCASE
       MiniTest::Display.options = {
-        suite_divider: ' // ',
-        print: {
-          success: 'PASS'
+        :suite_divider => ' // ',
+        :print => {
+          :success => 'PASS'
         }
       }
       class PrintTest < MiniTest::Unit::TestCase
