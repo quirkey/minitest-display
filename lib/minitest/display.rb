@@ -214,8 +214,11 @@ class MiniTest::Unit
 
   def status(io = self.output)
     format = "%d tests, %d assertions, %d failures, %d errors, %d skips"
-    final_status = failures + errors > 0 ? :failure : :success
-    io.puts display.color(format % [test_count, assertion_count, failures, errors, skips], [:bold, final_status])
+    final_status = if errors > 0 then :error
+                   elsif failures > 0 then :failure
+                   else :success
+                   end
+    io.puts display.color(format % [test_count, assertion_count, failures, errors, skips], final_status)
 
     if display.options[:output_slow]
       @test_times.sort! {|a, b| b[1] <=> a[1] }
