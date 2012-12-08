@@ -96,6 +96,67 @@ class TestMinitestDisplay < MiniTest::Unit::TestCase
   end
 
   def test_runs_basic_test_with_slow_output
+    capture_test_output <<-TESTCASE
+      MiniTest::Display.options = {
+        :suite_divider => ' // ',
+        :print => {
+          :success => 'PASS'
+        },
+        :output_slow => true
+      }
+      class PrintTest < MiniTest::Unit::TestCase
 
+        def test_truth
+          assert false
+        end
+
+        def test_equality
+          assert_equal 'test', 'test'
+        end
+      end
+    TESTCASE
+
+    assert_output(/PrintTest \/\//)
+    assert_output(/F/)
+    assert_output(/PASS/)
+    assert_output(/Slowest tests:/)
+  end
+
+  def test_adding_a_recorder
+    capture_test_output <<-TESTCASE
+      MiniTest::Display.options = {
+        :suite_divider => ' // ',
+        :print => {
+          :success => 'PASS'
+        }
+      }
+      class TestRecorder
+        def initialize(runner)
+          @runner = runner
+        end
+
+        def record(suite, method, assertions, time, error)
+          puts "I just recorded \#{method}"
+        end
+      end
+
+      MiniTest::Unit.runner.add_recorder TestRecorder
+
+      class PrintTest < MiniTest::Unit::TestCase
+
+        def test_truth
+          assert false
+        end
+
+        def test_equality
+          assert_equal 'test', 'test'
+        end
+      end
+    TESTCASE
+
+    assert_output(/PrintTest \/\//)
+    assert_output(/F/)
+    assert_output(/PASS/)
+    assert_output(/I just recorded test_truth/)
   end
 end
