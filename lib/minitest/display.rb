@@ -168,6 +168,7 @@ class MiniTest::Display::Runner < MiniTest::Unit
 
     # PATCH
     record_tests_started
+    # END
     start = Time.now
 
     puts
@@ -198,7 +199,9 @@ class MiniTest::Display::Runner < MiniTest::Unit
 
     puts
 
+    # PATCH
     record_tests_finished(report, test_count, assertion_count, t)
+    # END
     status
   end
 
