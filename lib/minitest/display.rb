@@ -115,70 +115,44 @@ module MiniTest
   end
 end
 
-class MiniTest::Unit
-  # Monkey Patchin!
-  def _run_anything(type)
-    suites = TestCase.send "#{type}_suites"
-    return if suites.empty?
+class MiniTest::Display::Runner < MiniTest::Unit
 
-    start = Time.now
-
-    puts
-    puts "# Running #{type}s:"
-    puts
-
-    @test_count, @assertion_count = 0, 0
-    sync = output.respond_to? :"sync=" # stupid emacs
-    old_sync, output.sync = output.sync, true if sync
-
-    results = _run_suites suites, type
-
-    @test_count      = results.inject(0) { |sum, (tc, _)| sum + tc }
-    @assertion_count = results.inject(0) { |sum, (_, ac)| sum + ac }
-
-    output.sync = old_sync if sync
-
-    t = Time.now - start
-
-    puts
-    puts
-    puts "Finished #{type}s in %.6fs, %.4f tests/s, %.4f assertions/s." %
-      [t, test_count / t, assertion_count / t]
-
-    report.each_with_index do |msg, i|
-      puts "\n%3d) %s" % [i + 1, msg]
-    end
-
-    puts
-
-    status
-  end
-
+  # Patched Run Suite
   def _run_suite(suite, type)
-    suite_header = ""
+    header = "#{type}_suite_header"
+    suite_header = send(header, suite) if respond_to? header
+
+    # PATCH
     if display.options[:suite_names] && display.printable_suite?(suite)
-      suite_header = suite.to_s
+      suite_header ||= suite.to_s
       print display.color("\n#{suite_header}#{display.options[:suite_divider]}", :suite)
     end
+    # END
 
     filter = options[:filter] || '/./'
     filter = Regexp.new $1 if filter =~ /\/(.*)\//
 
+    # PATCH
     wrap_at = display.options[:wrap_at] - suite_header.length
     wrap_count = wrap_at
 
     full_start_time = Time.now
     @test_times ||= []
+    # END
+
     assertions = suite.send("#{type}_methods").grep(filter).map { |method|
       inst = suite.new method
       inst._assertions = 0
 
       print "#{suite}##{method} = " if @verbose
 
-      @start_time = Time.now
+      # PATCH
+      start_time = Time.now
+      # END
       result = inst.run self
-      time = Time.now - @start_time
 
+      # PATCH
+      time = Time.now - start_time
       @test_times << ["#{suite}##{method}", time]
 
       print "%.2f s = " % time if @verbose
@@ -192,6 +166,7 @@ class MiniTest::Unit
       else
         result
       end
+
       puts if @verbose
 
       wrap_count -= 1
