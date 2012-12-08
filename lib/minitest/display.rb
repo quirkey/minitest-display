@@ -20,7 +20,7 @@ end
 
 module MiniTest
   module Display
-    VERSION = '0.1.0'
+    VERSION = '0.2.0.pre'
 
     class << self
       def options
