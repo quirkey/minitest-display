@@ -29,6 +29,7 @@ module MiniTest
           :color => true,
           :wrap_at => 80,
           :output_slow => 5,
+          :output_slow_suites => 5,
           :print => {
             :success => '.',
             :failure => 'F',
@@ -168,7 +169,7 @@ class MiniTest::Unit
     wrap_count = wrap_at
 
     full_start_time = Time.now
-    @test_times ||= []
+    @test_times ||= Hash.new { |h, k| h[k] = [] }
     assertions = suite.send("#{type}_methods").grep(filter).map { |method|
       inst = suite.new method
       inst._assertions = 0
@@ -179,7 +180,7 @@ class MiniTest::Unit
       result = inst.run self
       time = Time.now - @start_time
 
-      @test_times << ["#{suite}##{method}", time]
+      @test_times[suite] << ["#{suite}##{method}", time]
 
       print "%.2f s = " % time if @verbose
       print case result
@@ -220,12 +221,23 @@ class MiniTest::Unit
                    end
     io.puts display.color(format % [test_count, assertion_count, failures, errors, skips], final_status)
 
-    if display.options[:output_slow]
-      @test_times.sort! {|a, b| b[1] <=> a[1] }
-      puts "Slowest tests:"
-      @test_times[0..display.options[:output_slow].to_i].each do |test_name, time|
-        puts "%.2f s\t#{test_name}" % time
-      end
+    display_slow_tests if display.options[:output_slow]
+    display_slow_suites if display.options[:output_slow_suites]
+  end
+
+  def display_slow_tests
+    times = @test_times.values.flatten(1).sort { |a, b| b[1] <=> a[1] }
+    puts "Slowest tests:"
+    times[0..display.options[:output_slow].to_i].each do |test_name, time|
+      puts "%.2f s\t#{test_name}" % time
+    end
+  end
+
+  def display_slow_suites
+    times = @test_times.map { |suite, tests| [suite, tests.map(&:last).sum] }.sort { |a, b| b[1] <=> a[1] }
+    puts "Slowest suites:"
+    times[0..display.options[:output_slow_suites].to_i].each do |suite, time|
+      puts "%.2f s\t#{suite}" % time
     end
   end
 
