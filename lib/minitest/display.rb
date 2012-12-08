@@ -120,7 +120,89 @@ end
 
 class MiniTest::Display::Runner < MiniTest::Unit
 
-  # Patched Run Suite
+  def initialize(*args)
+    super
+    @recorders = []
+  end
+
+  # Add a recorder which for each test that has a `record`.
+  # Optionally can also have an:
+  #
+  # `record_tests_started`,
+  # `record_suite_started(suite)`,
+  # `record(suite, method, assertions, time, error)`
+  # `record_suite_finished(suite, assertions, time)`,
+  # `record_tests_finished(report, test_count, assertion_count, time)
+  #
+  # (Executed in that order)
+  #
+  def add_recorder(new_recorder)
+    new_recorder_instance = new_recorder.new(self)
+    @recorders << new_recorder_instance
+  end
+
+  def record_suite_started(suite)
+    run_recorder_method(:record_suite_started, suite)
+  end
+
+  def record_suite_finished(suite, assertions, time)
+    run_recorder_method(:record_suite_finished, suite)
+  end
+
+  def record_tests_started
+    run_recorder_method(:record_tests_started)
+  end
+
+  def record_tests_finished(report, test_count, assertion_count, time)
+    run_recorder_method(:record_tests_finished, report, test_count, assertion_count, time)
+  end
+
+  def record(suite, method, assertions, time, error)
+    run_recorder_method(:record, suite, method, assertions, time, error)
+  end
+
+  # Patched _run_anything
+  def _run_anything type
+    suites = TestCase.send "#{type}_suites"
+    return if suites.empty?
+
+    # PATCH
+    record_tests_started
+    start = Time.now
+
+    puts
+    puts "# Running #{type}s:"
+    puts
+
+    @test_count, @assertion_count = 0, 0
+    sync = output.respond_to? :"sync=" # stupid emacs
+    old_sync, output.sync = output.sync, true if sync
+
+    results = _run_suites suites, type
+
+    @test_count      = results.inject(0) { |sum, (tc, _)| sum + tc }
+    @assertion_count = results.inject(0) { |sum, (_, ac)| sum + ac }
+
+    output.sync = old_sync if sync
+
+    t = Time.now - start
+
+    puts
+    puts
+    puts "Finished #{type}s in %.6fs, %.4f tests/s, %.4f assertions/s." %
+      [t, test_count / t, assertion_count / t]
+
+    report.each_with_index do |msg, i|
+      puts "\n%3d) %s" % [i + 1, msg]
+    end
+
+    puts
+
+    record_tests_finished(report, test_count, assertion_count, t)
+    status
+  end
+
+  # Patched _run_suite
   def _run_suite(suite, type)
     header = "#{type}_suite_header"
     suite_header = send(header, suite) if respond_to? header
@@ -139,6 +221,7 @@ class MiniTest::Display::Runner < MiniTest::Unit
     wrap_at = display.options[:wrap_at] - suite_header.length if suite_header
     wrap_count = wrap_at
 
+    record_suite_started(suite)
     full_start_time = Time.now
     @test_times ||= Hash.new { |h, k| h[k] = [] }
 
@@ -183,6 +266,7 @@ class MiniTest::Display::Runner < MiniTest::Unit
 
     total_time = Time.now - full_start_time
 
+    record_suite_finished(suite, assertions, total_time)
     if assertions.length > 0 && display.options[:suite_time]
       print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
       print "%.2f s" % total_time
@@ -219,6 +303,14 @@ class MiniTest::Display::Runner < MiniTest::Unit
   end
 
   private
+  def run_recorder_method(method, *args)
+    @recorders.each do |recorder|
+      if recorder.respond_to?(method)
+        recorder.send method, *args
+      end
+    end
+  end
+
   def display
     ::MiniTest::Display
   end
