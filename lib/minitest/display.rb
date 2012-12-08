@@ -1,3 +1,5 @@
+require 'minitest/unit'
+
 class Hash
   unless method_defined?(:deep_merge!)
 
@@ -134,7 +136,7 @@ class MiniTest::Display::Runner < MiniTest::Unit
     filter = Regexp.new $1 if filter =~ /\/(.*)\//
 
     # PATCH
-    wrap_at = display.options[:wrap_at] - suite_header.length
+    wrap_at = display.options[:wrap_at] - suite_header.length if suite_header
     wrap_count = wrap_at
 
     full_start_time = Time.now
@@ -209,7 +211,7 @@ class MiniTest::Display::Runner < MiniTest::Unit
   end
 
   def display_slow_suites
-    times = @test_times.map { |suite, tests| [suite, tests.map(&:last).sum] }.sort { |a, b| b[1] <=> a[1] }
+    times = @test_times.map { |suite, tests| [suite, tests.map(&:last).inject {|sum, n| sum + n }] }.sort { |a, b| b[1] <=> a[1] }
     puts "Slowest suites:"
     times[0..display.options[:output_slow_suites].to_i].each do |suite, time|
       puts "%.2f s\t#{suite}" % time
@@ -221,3 +223,5 @@ class MiniTest::Display::Runner < MiniTest::Unit
     ::MiniTest::Display
   end
 end
+
+MiniTest::Unit.runner = MiniTest::Display::Runner.new
