@@ -1,3 +1,5 @@
+require 'minitest/unit'
+
 class Hash
   unless method_defined?(:deep_merge!)
 
@@ -18,7 +20,7 @@ end
 
 module MiniTest
   module Display
-    VERSION = '0.1.0'
+    VERSION = '0.2.0.pre'
 
     class << self
       def options
@@ -116,12 +118,57 @@ module MiniTest
   end
 end
 
-class MiniTest::Unit
-  # Monkey Patchin!
-  def _run_anything(type)
+class MiniTest::Display::Runner < MiniTest::Unit
+
+  def initialize(*args)
+    super
+    @recorders = []
+  end
+
+  # Add a recorder which for each test that has a `record`.
+  # Optionally can also have an:
+  #
+  # `record_tests_started`,
+  # `record_suite_started(suite)`,
+  # `record(suite, method, assertions, time, error)`
+  # `record_suite_finished(suite, assertions, time)`,
+  # `record_tests_finished(report, test_count, assertion_count, time)
+  #
+  # (Executed in that order)
+  #
+  def add_recorder(new_recorder)
+    new_recorder_instance = new_recorder.new(self)
+    @recorders << new_recorder_instance
+  end
+
+  def record_suite_started(suite)
+    run_recorder_method(:record_suite_started, suite)
+  end
+
+  def record_suite_finished(suite, assertions, time)
+    run_recorder_method(:record_suite_finished, suite)
+  end
+
+  def record_tests_started
+    run_recorder_method(:record_tests_started)
+  end
+
+  def record_tests_finished(report, test_count, assertion_count, time)
+    run_recorder_method(:record_tests_finished, report, test_count, assertion_count, time)
+  end
+
+  def record(suite, method, assertions, time, error)
+    run_recorder_method(:record, suite, method, assertions, time, error)
+  end
+
+  # Patched _run_anything
+  def _run_anything type
     suites = TestCase.send "#{type}_suites"
     return if suites.empty?
 
+    # PATCH
+    record_tests_started
+    # END
     start = Time.now
 
     puts
@@ -152,34 +199,49 @@ class MiniTest::Unit
 
     puts
 
+    # PATCH
+    record_tests_finished(report, test_count, assertion_count, t)
+    # END
     status
   end
 
+  # Patched _run_suite
   def _run_suite(suite, type)
-    suite_header = ""
+    header = "#{type}_suite_header"
+    suite_header = send(header, suite) if respond_to? header
+
+    # PATCH
     if display.options[:suite_names] && display.printable_suite?(suite)
-      suite_header = suite.to_s
+      suite_header ||= suite.to_s
       print display.color("\n#{suite_header}#{display.options[:suite_divider]}", :suite)
     end
+    # END
 
     filter = options[:filter] || '/./'
     filter = Regexp.new $1 if filter =~ /\/(.*)\//
 
-    wrap_at = display.options[:wrap_at] - suite_header.length
+    # PATCH
+    wrap_at = display.options[:wrap_at] - suite_header.length if suite_header
     wrap_count = wrap_at
 
+    record_suite_started(suite)
     full_start_time = Time.now
     @test_times ||= Hash.new { |h, k| h[k] = [] }
+
+    #END
     assertions = suite.send("#{type}_methods").grep(filter).map { |method|
       inst = suite.new method
       inst._assertions = 0
 
       print "#{suite}##{method} = " if @verbose
 
-      @start_time = Time.now
+      # PATCH
+      start_time = Time.now
+      # END
       result = inst.run self
-      time = Time.now - @start_time
 
+      # PATCH
+      time = Time.now - start_time
       @test_times[suite] << ["#{suite}##{method}", time]
 
       print "%.2f s = " % time if @verbose
@@ -193,6 +255,7 @@ class MiniTest::Unit
       else
         result
       end
+
       puts if @verbose
 
       wrap_count -= 1
@@ -206,6 +269,7 @@ class MiniTest::Unit
 
     total_time = Time.now - full_start_time
 
+    record_suite_finished(suite, assertions, total_time)
     if assertions.length > 0 && display.options[:suite_time]
       print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
       print "%.2f s" % total_time
@@ -234,7 +298,7 @@ class MiniTest::Unit
   end
 
   def display_slow_suites
-    times = @test_times.map { |suite, tests| [suite, tests.map(&:last).sum] }.sort { |a, b| b[1] <=> a[1] }
+    times = @test_times.map { |suite, tests| [suite, tests.map(&:last).inject {|sum, n| sum + n }] }.sort { |a, b| b[1] <=> a[1] }
     puts "Slowest suites:"
     times[0..display.options[:output_slow_suites].to_i].each do |suite, time|
       puts "%.2f s\t#{suite}" % time
@@ -242,7 +306,17 @@ class MiniTest::Unit
   end
 
   private
+  def run_recorder_method(method, *args)
+    @recorders.each do |recorder|
+      if recorder.respond_to?(method)
+        recorder.send method, *args
+      end
+    end
+  end
+
   def display
     ::MiniTest::Display
   end
 end
+
+MiniTest::Unit.runner = MiniTest::Display::Runner.new
