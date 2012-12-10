@@ -146,7 +146,7 @@ class MiniTest::Display::Runner < MiniTest::Unit
   end
 
   def record_suite_finished(suite, assertions, time)
-    run_recorder_method(:record_suite_finished, suite)
+    run_recorder_method(:record_suite_finished, suite, assertions, time)
   end
 
   def record_tests_started
