@@ -18,22 +18,26 @@ Requires Ruby 1.8.7 or 1.9 and the gem version of minitest >= 2.0.2
 
 Install minitest and minitest display:
 
-      gem install minitest minitest-display
+```
+gem install minitest minitest-display
+```
 
 In your test suite/test_helper, require and configure mini test/display:
 
-      require 'minitest/autorun'
-      require 'minitest/display'
+```ruby
+require 'minitest/autorun'
+require 'minitest/display'
 
-      MiniTest::Display.options = {
-        suite_names: true,
-        color: true,
-        print: {
-          success: "OK\n",
-          failure: "EPIC FAIL\n",
-          error: "ERRRRRRR\n"
-        }
-      }
+MiniTest::Display.options = {
+  suite_names: true,
+  color: true,
+  print: {
+    success: "OK\n",
+    failure: "EPIC FAIL\n",
+    error: "ERRRRRRR\n"
+  }
+}
+```
 
 That suite will look pretty funny. 
 
