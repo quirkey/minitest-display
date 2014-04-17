@@ -27,6 +27,7 @@ module MiniTest
         @options ||= {
           :suite_names => true,
           :suite_divider => " | ",
+          :suite_field_formatter => false,
           :suite_time => true,
           :color => true,
           :wrap_at => 80,
@@ -213,7 +214,12 @@ class MiniTest::Display::Runner < MiniTest::Unit
     # PATCH
     if display.options[:suite_names] && display.printable_suite?(suite)
       suite_header ||= suite.to_s
-      print display.color("\n#{suite_header}#{display.options[:suite_divider]}", :suite)
+
+      if display.options[:suite_field_formatter]
+        print display.color("\n#{suite_header}#{display.options[:suite_field_formatter]}" % '', :suite)
+      else
+        print display.color("\n#{suite_header}#{display.options[:suite_divider]}", :suite)
+      end
     end
     # END
 
@@ -260,7 +266,12 @@ class MiniTest::Display::Runner < MiniTest::Unit
 
       wrap_count -= 1
       if wrap_count == 0
-        print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
+        if display.options[:suite_field_formatter]
+          print display.options[:suite_field_formatter] % ''
+        else
+          print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
+        end
+
         wrap_count = wrap_at
       end
 
@@ -271,8 +282,12 @@ class MiniTest::Display::Runner < MiniTest::Unit
 
     record_suite_finished(suite, assertions, total_time)
     if assertions.length > 0 && display.options[:suite_time]
-      print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
-      print "%.2f s" % total_time
+      if display.options[:suite_field_formatter]
+        print display.options[:suite_field_formatter] % ("%.2f s" % total_time)
+      else
+        print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
+        print "%.2f s" % total_time
+      end
     end
     return assertions.size, assertions.inject(0) { |sum, n| sum + n }
   end
