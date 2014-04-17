@@ -27,7 +27,7 @@ module MiniTest
         @options ||= {
           :suite_names => true,
           :suite_divider => " | ",
-          :suite_field_formatter => false,
+          :suite_field_formatter => false, # Examples: 1 line output: " | %s", multi-line output: "\n %s"
           :suite_time => true,
           :color => true,
           :wrap_at => 80,
