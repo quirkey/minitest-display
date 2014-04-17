@@ -221,13 +221,15 @@ class MiniTest::Display::Runner < MiniTest::Unit
         print display.color("\n#{suite_header}#{display.options[:suite_divider]}", :suite)
       end
     end
+
+    suite_header_length = suite_header ? suite_header.length : 0
     # END
 
     filter = options[:filter] || '/./'
     filter = Regexp.new $1 if filter =~ /\/(.*)\//
 
     # PATCH
-    wrap_at = display.options[:wrap_at] - suite_header.length if suite_header
+    wrap_at = display.options[:wrap_at] - suite_header_length if suite_header
     wrap_count = wrap_at
 
     record_suite_started(suite)
@@ -264,15 +266,18 @@ class MiniTest::Display::Runner < MiniTest::Unit
 
       puts if @verbose
 
-      wrap_count -= 1
-      if wrap_count == 0
-        if display.options[:suite_field_formatter]
-          print display.options[:suite_field_formatter] % ''
-        else
-          print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
-        end
+      unless wrap_count.nil?
+        wrap_count -= 1
 
-        wrap_count = wrap_at
+        if wrap_count == 0
+          if display.options[:suite_field_formatter]
+            print display.options[:suite_field_formatter] % ''
+          else
+            print "\n#{' ' * suite_header_length}#{display.options[:suite_divider]}"
+          end
+
+          wrap_count = wrap_at
+        end
       end
 
       inst._assertions
@@ -281,14 +286,16 @@ class MiniTest::Display::Runner < MiniTest::Unit
     total_time = Time.now - full_start_time
 
     record_suite_finished(suite, assertions, total_time)
-    if assertions.length > 0 && display.options[:suite_time]
+
+    if suite_header && assertions.length > 0 && display.options[:suite_time]
       if display.options[:suite_field_formatter]
         print display.options[:suite_field_formatter] % ("%.2f s" % total_time)
       else
-        print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
+        print "\n#{' ' * suite_header_length}#{display.options[:suite_divider]}"
         print "%.2f s" % total_time
       end
     end
+
     return assertions.size, assertions.inject(0) { |sum, n| sum + n }
   end
 
