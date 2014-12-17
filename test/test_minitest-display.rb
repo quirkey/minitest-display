@@ -1,10 +1,10 @@
 require 'helper'
 
-class TestMinitestDisplay < MiniTest::Unit::TestCase
+class TestMinitestDisplay < MiniTest::Test
 
   def test_runs_basic_test_with_default_settings
     capture_test_output <<-TESTCASE
-      class BasicTest < MiniTest::Unit::TestCase
+      class BasicTest < Minitest::Test
 
         def test_truth
           assert true
@@ -22,7 +22,7 @@ class TestMinitestDisplay < MiniTest::Unit::TestCase
 
   def test_runs_basic_test_with_failures
     capture_test_output <<-TESTCASE
-      class BasicTest < MiniTest::Unit::TestCase
+      class BasicTest < Minitest::Test
 
         def test_truth
           assert false
@@ -41,7 +41,7 @@ class TestMinitestDisplay < MiniTest::Unit::TestCase
 
   def test_runs_basic_test_with_multiple_suites
     capture_test_output <<-TESTCASE
-      class BasicTest < MiniTest::Unit::TestCase
+      class BasicTest < Minitest::Test
 
         def test_truth
           assert false
@@ -52,7 +52,7 @@ class TestMinitestDisplay < MiniTest::Unit::TestCase
         end
       end
 
-      class AnotherBasicTest < MiniTest::Unit::TestCase
+      class AnotherBasicTest < Minitest::Test
 
         def test_truth
           assert false
@@ -78,7 +78,7 @@ class TestMinitestDisplay < MiniTest::Unit::TestCase
           :success => 'PASS'
         }
       }
-      class PrintTest < MiniTest::Unit::TestCase
+      class PrintTest < Minitest::Test
 
         def test_truth
           assert false
@@ -104,7 +104,7 @@ class TestMinitestDisplay < MiniTest::Unit::TestCase
         },
         :output_slow => true
       }
-      class PrintTest < MiniTest::Unit::TestCase
+      class PrintTest < Minitest::Test
 
         def test_truth
           assert false
@@ -142,7 +142,7 @@ class TestMinitestDisplay < MiniTest::Unit::TestCase
 
       MiniTest::Unit.runner.add_recorder TestRecorder
 
-      class PrintTest < MiniTest::Unit::TestCase
+      class PrintTest < Minitest::Test
 
         def test_truth
           assert false

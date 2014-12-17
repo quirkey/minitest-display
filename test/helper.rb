@@ -13,7 +13,7 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'minitest/display'
 $print_runs = ENV['DEBUG']
 
-class Minitest::Unit::TestCase
+class Minitest::Test
   attr_reader :suite_output
 
   def capture_test_output(testcase_str)
