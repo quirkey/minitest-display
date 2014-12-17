@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-gem "minitest", "~> 4.3"
+gem "minitest", ">= 5.0"
 
 group :development do
   gem "bundler", "~> 1.0"
