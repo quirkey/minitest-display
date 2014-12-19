@@ -140,7 +140,7 @@ class TestMinitestDisplay < MiniTest::Test
         end
       end
 
-      MiniTest::Unit.runner.add_recorder TestRecorder
+      MiniTest::Display.add_recorder TestRecorder
 
       class PrintTest < Minitest::Test
 
