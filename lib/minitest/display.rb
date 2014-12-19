@@ -1,4 +1,4 @@
-require 'minitest/unit'
+require 'minitest' 
 
 class Hash
   unless method_defined?(:deep_merge!)
@@ -18,9 +18,9 @@ class Hash
   end
 end
 
-module MiniTest
+module Minitest
   module Display
-    VERSION = '0.2.0.pre2'
+    VERSION = '0.3.0.pre1'
 
     class << self
       def options
@@ -113,210 +113,133 @@ module MiniTest
       def printable_suite?(suite)
         !DONT_PRINT_CLASSES.include?(suite.to_s)
       end
-    end
-
-  end
-end
-
-class MiniTest::Display::Runner < MiniTest::Unit
-
-  def initialize(*args)
-    super
-    @recorders = []
-  end
-
-  # Add a recorder which for each test that has a `record`.
-  # Optionally can also have an:
-  #
-  # `record_tests_started`,
-  # `record_suite_started(suite)`,
-  # `record(suite, method, assertions, time, error)`
-  # `record_suite_finished(suite, assertions, time)`,
-  # `record_tests_finished(report, test_count, assertion_count, time)
-  #
-  # (Executed in that order)
-  #
-  def add_recorder(new_recorder)
-    new_recorder_instance = new_recorder.new(self)
-    @recorders << new_recorder_instance
-  end
-
-  def record_suite_started(suite)
-    run_recorder_method(:record_suite_started, suite)
-  end
-
-  def record_suite_finished(suite, assertions, time)
-    run_recorder_method(:record_suite_finished, suite, assertions, time)
-  end
-
-  def record_tests_started
-    run_recorder_method(:record_tests_started)
-  end
-
-  def record_tests_finished(report, test_count, assertion_count, time)
-    run_recorder_method(:record_tests_finished, report, test_count, assertion_count, time)
-  end
-
-  def record(suite, method, assertions, time, error)
-    run_recorder_method(:record, suite, method, assertions, time, error)
-  end
-
-  # Patched _run_anything
-  def _run_anything type
-    suites = TestCase.send "#{type}_suites"
-    return if suites.empty?
-
-    # PATCH
-    record_tests_started
-    # END
-    start = Time.now
-
-    puts
-    puts "# Running #{type}s:"
-    puts
-
-    @test_count, @assertion_count = 0, 0
-    sync = output.respond_to? :"sync=" # stupid emacs
-    old_sync, output.sync = output.sync, true if sync
-
-    results = _run_suites suites, type
-
-    @test_count      = results.inject(0) { |sum, (tc, _)| sum + tc }
-    @assertion_count = results.inject(0) { |sum, (_, ac)| sum + ac }
-
-    output.sync = old_sync if sync
-
-    t = Time.now - start
-
-    puts
-    puts
-    puts "Finished #{type}s in %.6fs, %.4f tests/s, %.4f assertions/s." %
-      [t, test_count / t, assertion_count / t]
-
-    report.each_with_index do |msg, i|
-      puts "\n%3d) %s" % [i + 1, msg]
-    end
-
-    puts
-
-    # PATCH
-    record_tests_finished(report, test_count, assertion_count, t)
-    # END
-    status
-  end
-
-  # Patched _run_suite
-  def _run_suite(suite, type)
-    header = "#{type}_suite_header"
-    suite_header = send(header, suite) if respond_to? header
-
-    # PATCH
-    if display.options[:suite_names] && display.printable_suite?(suite)
-      suite_header ||= suite.to_s
-      print display.color("\n#{suite_header}#{display.options[:suite_divider]}", :suite)
-    end
-    # END
-
-    filter = options[:filter] || '/./'
-    filter = Regexp.new $1 if filter =~ /\/(.*)\//
-
-    # PATCH
-    wrap_at = display.options[:wrap_at] - suite_header.length if suite_header
-    wrap_count = wrap_at
-
-    record_suite_started(suite)
-    full_start_time = Time.now
-    @test_times ||= Hash.new { |h, k| h[k] = [] }
-
-    #END
-    assertions = suite.send("#{type}_methods").grep(filter).map { |method|
-      inst = suite.new method
-      inst._assertions = 0
-
-      print "#{suite}##{method} = " if @verbose
-
-      # PATCH
-      start_time = Time.now
-      # END
-      result = inst.run self
-
-      # PATCH
-      time = Time.now - start_time
-      @test_times[suite] << ["#{suite}##{method}", time]
-
-      print "%.2f s = " % time if @verbose
-      print case result
-      when "."
-        display.color(display.options[:print][:success], :success)
-      when "F"
-        display.color(display.options[:print][:failure], :failure)
-      when "E"
-        display.color(display.options[:print][:error], :error)
-      else
-        result
+      
+      # Add a recorder which for each test that has a `record`.
+      # Optionally can also have an:
+      #
+      # `record_tests_started`,
+      # `record_suite_started(suite)`,
+      # `record(suite, method, assertions, time, error)`
+      # `record_suite_finished(suite, assertions, time)`,
+      # `record_tests_finished(test_count, assertion_count, failure_count, error_count, time)
+      #
+      # (Executed in that order)
+      #
+      def add_recorder(new_recorder)
+        new_recorder_instance = new_recorder.new(self)
+        @recorders ||= []
+        @recorders << new_recorder_instance
       end
 
-      puts if @verbose
+      # An array of all the registered MiniTest::Display recorders
+      def recorders
+        @recorders || []
+      end
+    end
 
-      wrap_count -= 1
-      if wrap_count == 0
+    class Reporter < ::Minitest::Reporter
+
+      def initialize(*args)
+        super
+        @total_assertions = 0
+        @total_errors = 0
+        @total_failures = 0
+        @total_tests = 0
+      end
+
+      def record_suite_started(suite)
+        if display.options[:suite_names] && display.printable_suite?(suite)
+          suite_header ||= suite.to_s
+          print display.color("\n#{suite_header}#{display.options[:suite_divider]}", :suite)
+          @wrap_at = display.options[:wrap_at] - suite_header.length
+          @wrap_count = @wrap_at
+        end
+        @suite_start = Time.now
+        run_recorder_method(:record_suite_started, suite)
+      end
+
+      def record_suite_finished(suite)
+        @suite_finished = Time.now
+        time = start.to_i - finished.to_i
         print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
-        wrap_count = wrap_at
+        print "%.2f s" % time 
+        run_recorder_method(:record_suite_finished, suite, @assertions, time)
       end
 
-      inst._assertions
-    }
+      def start
+        @test_times ||= Hash.new { |h, k| h[k] = [] }
+        @tests_started = Time.now.to_i
+        run_recorder_method(:record_tests_started)
+      end
 
-    total_time = Time.now - full_start_time
+      def report
+        display_slow_tests if display.options[:output_slow]
+        display_slow_suites if display.options[:output_slow_suites]
+        run_recorder_method(:record_tests_finished, @total_tests, @total_assertions, @total_failures, @total_errors, Time.now.to_i - @tests_started)
+      end
 
-    record_suite_finished(suite, assertions, total_time)
-    if assertions.length > 0 && display.options[:suite_time]
-      print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
-      print "%.2f s" % total_time
-    end
-    return assertions.size, assertions.inject(0) { |sum, n| sum + n }
-  end
+      def record(result)
+        suite = result.class
+        if suite != @current_suite
+          record_suite_finished(@current_suite) if @current_suite
+          record_suite_started(suite)
+          @assertions = 0
+        end
+        @assertions += result.assertions 
+        @total_assertions += result.assertions
+        @total_tests += 1
+        output = if result.error?
+          @total_errors += 1
+          display.color(display.options[:print][:error], :error)
+        elsif result.failure
+          @total_failures += 1
+          display.color(display.options[:print][:failure], :failure)
+        else
+          display.color(display.options[:print][:success], :success)
+        end
 
-  def status(io = self.output)
-    format = "%d tests, %d assertions, %d failures, %d errors, %d skips"
-    final_status = if errors > 0 then :error
-                   elsif failures > 0 then :failure
-                   else :success
-                   end
-    io.puts display.color(format % [test_count, assertion_count, failures, errors, skips], final_status)
+        print output
 
-    display_slow_tests if display.options[:output_slow]
-    display_slow_suites if display.options[:output_slow_suites]
-  end
+        @wrap_count -= 1
+        if @wrap_count == 0
+          print "\n#{' ' * suite.to_s.length}#{display.options[:suite_divider]}"
+          @wrap_count = @wrap_at
+        end
 
-  def display_slow_tests
-    times = @test_times.values.flatten(1).sort { |a, b| b[1] <=> a[1] }
-    puts "Slowest tests:"
-    times[0..display.options[:output_slow].to_i].each do |test_name, time|
-      puts "%.2f s\t#{test_name}" % time
-    end
-  end
+        run_recorder_method(:record, suite, result.name, result.assertions, result.time, result.failure)
+        @test_times[suite] << ["#{suite}##{result.name}", result.time]
+        @current_suite = suite
+      end
 
-  def display_slow_suites
-    times = @test_times.map { |suite, tests| [suite, tests.map(&:last).inject {|sum, n| sum + n }] }.sort { |a, b| b[1] <=> a[1] }
-    puts "Slowest suites:"
-    times[0..display.options[:output_slow_suites].to_i].each do |suite, time|
-      puts "%.2f s\t#{suite}" % time
-    end
-  end
+      def display_slow_tests
+        times = @test_times.values.flatten(1).sort { |a, b| b[1] <=> a[1] }
+        puts "Slowest tests:"
+        times[0..display.options[:output_slow].to_i].each do |test_name, time|
+          puts "%.2f s\t#{test_name}" % time
+        end
+      end
 
-  private
-  def run_recorder_method(method, *args)
-    @recorders.each do |recorder|
-      if recorder.respond_to?(method)
-        recorder.send method, *args
+      def display_slow_suites
+        times = @test_times.map { |suite, tests| [suite, tests.map(&:last).inject {|sum, n| sum + n }] }.sort { |a, b| b[1] <=> a[1] }
+        puts "Slowest suites:"
+        times[0..display.options[:output_slow_suites].to_i].each do |suite, time|
+          puts "%.2f s\t#{suite}" % time
+        end
+      end
+
+      private
+      def run_recorder_method(method, *args)
+        Minitest::Display.recorders.each do |recorder|
+          if recorder.respond_to?(method)
+            recorder.send method, *args
+          end
+        end
+      end
+
+      def display
+        ::Minitest::Display
       end
     end
-  end
 
-  def display
-    ::MiniTest::Display
   end
 end
-
-MiniTest::Unit.runner = MiniTest::Display::Runner.new

@@ -10,10 +10,14 @@ end
 require 'minitest/autorun'
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
-require 'minitest/display'
+
+# Init the plugin
+Minitest.extensions = ["display"] 
+require "minitest/display_plugin"
+
 $print_runs = ENV['DEBUG']
 
-class MiniTest::Unit::TestCase
+class Minitest::Test
   attr_reader :suite_output
 
   def capture_test_output(testcase_str)
@@ -24,7 +28,9 @@ class MiniTest::Unit::TestCase
     tmpfilename = "#{tmpdir}/fake_test_suite.rb"
     header = %{
       require 'minitest/autorun'
-      require '#{lib_dir}/minitest/display'
+      $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+      Minitest.extensions = ["display"] 
+      require "#{lib_dir}/minitest/display_plugin"
     }
 
     testcase_str = header + "\n" + testcase_str

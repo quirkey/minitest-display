@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
     "Rakefile",
     "TODO",
     "lib/minitest/display.rb",
+    "lib/minitest/display_plugin.rb",
     "minitest-display.gemspec",
     "test/helper.rb",
     "test/test_minitest-display.rb"
