@@ -154,13 +154,13 @@ module Minitest
           @wrap_at = display.options[:wrap_at] - @suite_header.length
           @wrap_count = @wrap_at
         end
-        @suite_start = Time.now
+        @suite_started = Time.now
         run_recorder_method(:record_suite_started, suite)
       end
 
       def record_suite_finished(suite)
         @suite_finished = Time.now
-        time = @suite_start.to_i - @suite_finished.to_i
+        time = @suite_finished.to_i - @suite_started.to_i
         print "\n#{' ' * @suite_header.length}#{display.options[:suite_divider]}"
         print "%.2f s" % time 
         run_recorder_method(:record_suite_finished, suite, @assertions, time)
