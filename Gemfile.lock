@@ -48,4 +48,4 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.0)
   jeweler (~> 1.5)
-  minitest (>= 5.0)
+  minitest (~> 5.0)

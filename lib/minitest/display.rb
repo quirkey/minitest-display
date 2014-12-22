@@ -160,7 +160,7 @@ module Minitest
 
       def record_suite_finished(suite)
         @suite_finished = Time.now
-        time = @suite_finished.to_i - @suite_started.to_i
+        time = @suite_finished.to_f - @suite_started.to_f
         print "\n#{' ' * @suite_header.length}#{display.options[:suite_divider]}"
         print "%.2f s" % time 
         run_recorder_method(:record_suite_finished, suite, @assertions, time)
@@ -168,14 +168,16 @@ module Minitest
 
       def start
         @test_times ||= Hash.new { |h, k| h[k] = [] }
-        @tests_started = Time.now.to_i
+        @tests_started = Time.now.to_f
         run_recorder_method(:record_tests_started)
       end
 
       def report
+        record_suite_finished(@current_suite) if @current_suite
+        puts 
         display_slow_tests if display.options[:output_slow]
         display_slow_suites if display.options[:output_slow_suites]
-        run_recorder_method(:record_tests_finished, @total_tests, @total_assertions, @total_failures, @total_errors, Time.now.to_i - @tests_started)
+        run_recorder_method(:record_tests_finished, @total_tests, @total_assertions, @total_failures, @total_errors, Time.now.to_f - @tests_started)
       end
 
       def record(result)
