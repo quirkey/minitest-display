@@ -149,9 +149,9 @@ module Minitest
 
       def record_suite_started(suite)
         if display.options[:suite_names] && display.printable_suite?(suite)
-          suite_header ||= suite.to_s
-          print display.color("\n#{suite_header}#{display.options[:suite_divider]}", :suite)
-          @wrap_at = display.options[:wrap_at] - suite_header.length
+          @suite_header = suite.to_s
+          print display.color("\n#{@suite_header}#{display.options[:suite_divider]}", :suite)
+          @wrap_at = display.options[:wrap_at] - @suite_header.length
           @wrap_count = @wrap_at
         end
         @suite_start = Time.now
@@ -160,8 +160,8 @@ module Minitest
 
       def record_suite_finished(suite)
         @suite_finished = Time.now
-        time = start.to_i - finished.to_i
-        print "\n#{' ' * suite_header.length}#{display.options[:suite_divider]}"
+        time = @suite_start.to_i - @suite_finished.to_i
+        print "\n#{' ' * @suite_header.length}#{display.options[:suite_divider]}"
         print "%.2f s" % time 
         run_recorder_method(:record_suite_finished, suite, @assertions, time)
       end
@@ -202,7 +202,7 @@ module Minitest
 
         @wrap_count -= 1
         if @wrap_count == 0
-          print "\n#{' ' * suite.to_s.length}#{display.options[:suite_divider]}"
+          print "\n#{' ' * @suite_header.length}#{display.options[:suite_divider]}"
           @wrap_count = @wrap_at
         end
 
