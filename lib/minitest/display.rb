@@ -1,4 +1,4 @@
-require 'minitest' 
+require 'minitest'
 
 class Hash
   unless method_defined?(:deep_merge!)
@@ -113,7 +113,7 @@ module Minitest
       def printable_suite?(suite)
         !DONT_PRINT_CLASSES.include?(suite.to_s)
       end
-      
+
       # Add a recorder which for each test that has a `record`.
       # Optionally can also have an:
       #
@@ -162,7 +162,7 @@ module Minitest
         @suite_finished = Time.now
         time = @suite_finished.to_f - @suite_started.to_f
         print "\n#{' ' * @suite_header.length}#{display.options[:suite_divider]}"
-        print "%.2f s" % time 
+        print "%.2f s" % time
         run_recorder_method(:record_suite_finished, suite, @assertions, time)
       end
 
@@ -174,7 +174,7 @@ module Minitest
 
       def report
         record_suite_finished(@current_suite) if @current_suite
-        puts 
+        puts
         display_slow_tests if display.options[:output_slow]
         display_slow_suites if display.options[:output_slow_suites]
         run_recorder_method(:record_tests_finished, @total_tests, @total_assertions, @total_failures, @total_errors, Time.now.to_f - @tests_started)
@@ -187,7 +187,7 @@ module Minitest
           record_suite_started(suite)
           @assertions = 0
         end
-        @assertions += result.assertions 
+        @assertions += result.assertions
         @total_assertions += result.assertions
         @total_tests += 1
         output = if result.error?
@@ -225,7 +225,7 @@ module Minitest
         times = @test_times.map { |suite, tests| [suite, tests.map(&:last).inject {|sum, n| sum + n }] }.sort { |a, b| b[1] <=> a[1] }
         puts "Slowest suites:"
         times[0..display.options[:output_slow_suites].to_i].each do |suite, time|
-          puts "%.2f s\t#{suite.gsub(/%/, '%%')}" % time
+          puts "%.2f s\t#{suite.name.gsub(/%/, '%%')}" % time
         end
       end
 
