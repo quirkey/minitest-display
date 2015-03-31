@@ -217,7 +217,7 @@ module Minitest
         times = @test_times.values.flatten(1).sort { |a, b| b[1] <=> a[1] }
         puts "Slowest tests:"
         times[0..display.options[:output_slow].to_i].each do |test_name, time|
-          puts "%.2f s\t#{test_name}" % time
+          puts "%.2f s\t#{test_name.gsub(/%/, '%%')}" % time
         end
       end
 
@@ -225,7 +225,7 @@ module Minitest
         times = @test_times.map { |suite, tests| [suite, tests.map(&:last).inject {|sum, n| sum + n }] }.sort { |a, b| b[1] <=> a[1] }
         puts "Slowest suites:"
         times[0..display.options[:output_slow_suites].to_i].each do |suite, time|
-          puts "%.2f s\t#{suite}" % time
+          puts "%.2f s\t#{suite.gsub(/%/, '%%')}" % time
         end
       end
 
