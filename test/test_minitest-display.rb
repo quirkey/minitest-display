@@ -1,16 +1,17 @@
 require 'helper'
+require 'minitest/spec'
 
 class TestMinitestDisplay < MiniTest::Test
 
   def test_runs_basic_test_with_default_settings
     capture_test_output <<-TESTCASE
-      class BasicTest < Minitest::Test
+      describe "BasicTest" do
 
-        def test_truth
+        it "asserts truth" do
           assert true
         end
 
-        def test_equality
+        it "asserts equality" do
           assert_equal 'test', 'test'
         end
       end
@@ -22,13 +23,13 @@ class TestMinitestDisplay < MiniTest::Test
 
   def test_runs_basic_test_with_failures
     capture_test_output <<-TESTCASE
-      class BasicTest < Minitest::Test
+      describe "BasicTest" do
 
-        def test_truth
+        it "fails when asserting false" do
           assert false
         end
 
-        def test_equality
+        it "asserts equality" do
           assert_equal 'test', 'test'
         end
       end
@@ -41,24 +42,25 @@ class TestMinitestDisplay < MiniTest::Test
 
   def test_runs_basic_test_with_multiple_suites
     capture_test_output <<-TESTCASE
-      class BasicTest < Minitest::Test
 
-        def test_truth
+      describe "BasicTest" do
+
+        it "fails when asserting false" do
           assert false
         end
 
-        def test_equality
+        it "asserts equality" do
           assert_equal 'test', 'test'
         end
       end
 
-      class AnotherBasicTest < Minitest::Test
+      describe "AnotherBasicTest" do
 
-        def test_truth
+        it "fails when asserting false" do
           assert false
         end
 
-        def test_equality
+        it "asserts equality" do
           assert_equal 'test', 'test'
         end
       end
@@ -78,13 +80,14 @@ class TestMinitestDisplay < MiniTest::Test
           :success => 'PASS'
         }
       }
-      class PrintTest < Minitest::Test
 
-        def test_truth
+      describe "PrintTest" do
+
+        it "fails when asserting false" do
           assert false
         end
 
-        def test_equality
+        it "asserts equality" do
           assert_equal 'test', 'test'
         end
       end
@@ -104,19 +107,46 @@ class TestMinitestDisplay < MiniTest::Test
         },
         :output_slow => true
       }
-      class PrintTest < Minitest::Test
 
-        def test_truth
+      describe "PrintTest" do
+
+        it "fails when asserting false" do
           assert false
         end
 
-        def test_equality
+        it "asserts equality" do
           assert_equal 'test', 'test'
         end
       end
     TESTCASE
 
     assert_output(/PrintTest \/\//)
+    assert_output(/F/)
+    assert_output(/PASS/)
+    assert_output(/Slowest tests:/)
+  end
+
+  def test_runs_basic_test_suite_with_slow_output_and_percent_sign
+    capture_test_output <<-TESTCASE
+      MiniTest::Display.options = {
+        :suite_divider => ' // ',
+        :print => {
+          :success => 'PASS'
+        }
+      }
+      describe "Print%Test" do
+
+        it "fails when asserting false" do
+          assert false
+        end
+
+        it "accepts tests with a % sign in the name" do
+          assert_equal "0%", "0%"
+        end
+      end
+    TESTCASE
+
+    assert_output(/Print%Test \/\//)
     assert_output(/F/)
     assert_output(/PASS/)
     assert_output(/Slowest tests:/)
@@ -142,13 +172,13 @@ class TestMinitestDisplay < MiniTest::Test
 
       MiniTest::Display.add_recorder TestRecorder
 
-      class PrintTest < Minitest::Test
+      describe "PrintTest" do
 
-        def test_truth
+        it "fails when asserting false" do
           assert false
         end
 
-        def test_equality
+        it "asserts equality" do
           assert_equal 'test', 'test'
         end
       end
@@ -157,6 +187,6 @@ class TestMinitestDisplay < MiniTest::Test
     assert_output(/PrintTest \/\//)
     assert_output(/F/)
     assert_output(/PASS/)
-    assert_output(/I just recorded test_truth/)
+    assert_output(/I just recorded.*fails when asserting false/)
   end
 end
