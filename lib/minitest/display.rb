@@ -150,7 +150,7 @@ module Minitest
       def record_suite_started(suite)
         if display.options[:suite_names] && display.printable_suite?(suite)
           @suite_header = suite.to_s
-          print display.color("\n#{@suite_header}#{display.options[:suite_divider]}", :suite)
+          io.print display.color("\n#{@suite_header}#{display.options[:suite_divider]}", :suite)
           @wrap_at = display.options[:wrap_at] - @suite_header.length
           @wrap_count = @wrap_at
         end
@@ -161,8 +161,8 @@ module Minitest
       def record_suite_finished(suite)
         @suite_finished = Time.now
         time = @suite_finished.to_f - @suite_started.to_f
-        print "\n#{' ' * @suite_header.length}#{display.options[:suite_divider]}"
-        print "%.2f s" % time
+        io.print "\n#{' ' * @suite_header.length}#{display.options[:suite_divider]}"
+        io.print "%.2f s" % time
         run_recorder_method(:record_suite_finished, suite, @assertions, time)
       end
 
@@ -174,7 +174,7 @@ module Minitest
 
       def report
         record_suite_finished(@current_suite) if @current_suite
-        puts
+        io.puts
         display_slow_tests if display.options[:output_slow]
         display_slow_suites if display.options[:output_slow_suites]
         run_recorder_method(:record_tests_finished, @total_tests, @total_assertions, @total_failures, @total_errors, Time.now.to_f - @tests_started)
@@ -200,11 +200,11 @@ module Minitest
           display.color(display.options[:print][:success], :success)
         end
 
-        print output
+        io.print output
 
         @wrap_count -= 1
         if @wrap_count == 0
-          print "\n#{' ' * @suite_header.length}#{display.options[:suite_divider]}"
+          io.print "\n#{' ' * @suite_header.length}#{display.options[:suite_divider]}"
           @wrap_count = @wrap_at
         end
 
@@ -215,17 +215,17 @@ module Minitest
 
       def display_slow_tests
         times = @test_times.values.flatten(1).sort { |a, b| b[1] <=> a[1] }
-        puts "Slowest tests:"
+        io.puts "Slowest tests:"
         times[0..display.options[:output_slow].to_i].each do |test_name, time|
-          puts "%.2f s\t#{test_name.gsub(/%/, '%%')}" % time
+          io.puts "%.2f s\t#{test_name.gsub(/%/, '%%')}" % time
         end
       end
 
       def display_slow_suites
         times = @test_times.map { |suite, tests| [suite, tests.map(&:last).inject {|sum, n| sum + n }] }.sort { |a, b| b[1] <=> a[1] }
-        puts "Slowest suites:"
+        io.puts "Slowest suites:"
         times[0..display.options[:output_slow_suites].to_i].each do |suite, time|
-          puts "%.2f s\t#{suite.name.gsub(/%/, '%%')}" % time
+          io.puts "%.2f s\t#{suite.name.gsub(/%/, '%%')}" % time
         end
       end
 
