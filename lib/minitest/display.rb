@@ -133,7 +133,7 @@ module Minitest
 
       # An array of all the registered MiniTest::Display recorders
       def recorders
-        @recorders || []
+        (defined? @recorders) ? @recorders : []
       end
     end
 
