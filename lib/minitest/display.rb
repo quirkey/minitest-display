@@ -23,6 +23,13 @@ module Minitest
     VERSION = '0.3.1'
 
     class << self
+      def initialize
+        @recorders = []
+      end
+
+      # An array of all the registered MiniTest::Display recorders
+      attr_reader @recorders
+
       def options
         @options ||= {
           :suite_names => true,
@@ -127,14 +134,9 @@ module Minitest
       #
       def add_recorder(new_recorder)
         new_recorder_instance = new_recorder.new(self)
-        @recorders ||= []
         @recorders << new_recorder_instance
       end
 
-      # An array of all the registered MiniTest::Display recorders
-      def recorders
-        @recorders || []
-      end
     end
 
     class Reporter < ::Minitest::Reporter
